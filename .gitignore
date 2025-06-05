@@ -1,5 +1,6 @@
 build
 prog
 ex00/convert
+ex01/serial
 *.log
 .vscode/settings.json
