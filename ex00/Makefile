@@ -1,4 +1,4 @@
-NAME			=	prog
+NAME			=	convert
 DIR_SRC			=	./
 DIR_BUILD		=	./build
 SOURCES			=	main.cpp ScalarConverter.cpp 

@@ -1,7 +1,5 @@
 #include "ScalarConverter.hpp"
 
-#define cit std::string::const_iterator
-
 ScalarConverter::ScalarConverter()
 {
 }
@@ -11,16 +9,40 @@ ScalarConverter::ScalarConverter(const ScalarConverter &src)
     (void)src;
 }
 
+bool iterator_match(
+    std::string::const_iterator i,
+    std::string::const_iterator end,
+    const std::string &str)
+{
+    for (
+        std::string::const_iterator s = str.begin();
+        s != str.end() && i != end;
+        s++, i++)
+    {
+        if (*i != *s)
+            return false;
+    }
+    return true;
+}
+
 t_input ScalarConverter::getInputType(const std::string &str)
 {
+    std::string pseudo[] = {"inf", ""};
+
     std::string::const_iterator i = str.begin();
 
-    if (str.length() == 1)
+    if (str.length() == 3 && str[0] == '\'' && str[2] == '\'')
         return CHAR;
     while (i != str.end() && std::isspace(*i))
         i++;
+    if (i == str.end())
+        return NONE;
+    if (iterator_match(i, str.end(), "nan"))
+        return PSEUDO;
     if (i != str.end() && (*i == '+' || *i == '-'))
         i++;
+    if (iterator_match(i, str.end(), "inf"))
+        return PSEUDO;
     if (i == str.end() || !std::isdigit(*i))
         return NONE;
     while (i != str.end() && std::isdigit(*i))
@@ -30,14 +52,11 @@ t_input ScalarConverter::getInputType(const std::string &str)
     i++;
     while (i != str.end() && std::isdigit(*i))
         i++;
-    if (*i == 'f')
-        return FLOAT;
-    return DOUBLE;
+    return FLOAT;
 }
 
 t_values getValuesFrom(char c)
 {
-    std::cout << "\nFROM CHAR" << std::endl;
     return (t_values){
         .c = c,
         .i = static_cast<int>(c),
@@ -46,7 +65,6 @@ t_values getValuesFrom(char c)
 }
 t_values getValuesFrom(int i)
 {
-    std::cout << "\nFROM INT" << std::endl;
     return (t_values){
         .c = static_cast<char>(i),
         .i = i,
@@ -55,7 +73,6 @@ t_values getValuesFrom(int i)
 }
 t_values getValuesFrom(double d)
 {
-    std::cout << "\nFROM DOUBLE" << std::endl;
     return (t_values){
         .c = static_cast<char>(d),
         .i = static_cast<int>(d),
@@ -65,7 +82,7 @@ t_values getValuesFrom(double d)
 
 std::string convertChar(char c, t_input t)
 {
-    if (t == NONE)
+    if (t == NONE || t == PSEUDO)
         return "Impossible";
     if (std::isprint(c))
         return (std::stringstream() << "'" << c << "'").str();
@@ -80,24 +97,33 @@ std::string ScalarConverter::convert(const std::string &str)
     switch (t)
     {
     case CHAR:
-        values = getValuesFrom(str[0]);
+        values = getValuesFrom(str[1]);
         break;
     case INTEGER:
         values = getValuesFrom(std::atoi(str.c_str()));
         break;
     case FLOAT:
-    case DOUBLE:
+    case PSEUDO:
         values = getValuesFrom(std::atof(str.c_str()));
         break;
     default:
         break;
     }
 
-    ss << "input:\t`" << str << "`\n";
+    ss << "string:\t\"" << str << "\"\n";
     ss << "char:\t" << convertChar(values.c, t) << "\n";
-    ss << "int:\t" << values.i << "\n";
-    ss << std::fixed << std::setprecision(1);
-    ss << "float:\t" << values.f << "f\n";
-    ss << "double:\t" << values.d << "\n";
+    ss << "int:\t";
+    if (t == NONE || t == PSEUDO)
+        ss << "Impossible" << "\n";
+    else
+        ss << values.i << "\n";
+    if (t == NONE)
+        ss << "float:\tImpossible\ndouble:\tImpossible\n";
+    else
+    {
+        ss << std::fixed << std::setprecision(1);
+        ss << "float:\t" << values.f << "f\n";
+        ss << "double:\t" << values.d << "\n";
+    }
     return ss.str();
 }

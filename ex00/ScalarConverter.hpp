@@ -12,7 +12,7 @@ typedef enum
     CHAR,
     INTEGER,
     FLOAT,
-    DOUBLE,
+    PSEUDO
 } t_input;
 
 typedef struct

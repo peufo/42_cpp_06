@@ -1,4 +1,5 @@
 build
 prog
+ex00/convert
 *.log
 .vscode/settings.json
