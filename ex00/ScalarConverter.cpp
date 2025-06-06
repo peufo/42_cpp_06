@@ -82,10 +82,15 @@ t_values getValuesFrom(double d)
 
 std::string convertChar(char c, t_input t)
 {
+
     if (t == NONE || t == PSEUDO)
         return "Impossible";
     if (std::isprint(c))
-        return (std::stringstream() << "'" << c << "'").str();
+    {
+        std::stringstream ss;
+        ss << "'" << c << "'";
+        return ss.str();
+    }
     return "Non displayable";
 }
 

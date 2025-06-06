@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <ctime>
+#include <cstdlib>
 
 Base *generate(void)
 {
